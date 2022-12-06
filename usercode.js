@@ -1,6 +1,9 @@
 module.exports = (data) => 
 
- npm install jsonwebtoken
+ {
+  "alg": "HS256",
+  "typ": "JWT"
+}
   
 
     return data;
