@@ -1,5 +1,10 @@
-const jwtSign = require("corezoid-jwt");
-data.token = jwtSign({your: "data"}, "secret");
+module.exports = (data) => {
+    var signature = 'saffadddf';
+    data.res = base64UrlEncode(signature); 
+    
+    return data;
+};
+
 
 
 /*const sha1 = require("crypto-js/sha1");
