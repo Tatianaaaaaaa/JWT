@@ -1,8 +1,13 @@
+
 module.exports = (data) => {
-   function utf8_to_b64(str) {
+   /*function utf8_to_b64(str) {
       return window.btoa(unescape(encodeURIComponent(str)));
-    }
-    data.res = utf8_to_b64("✓ à la mode"); ; 
+    }*/
+   
+   function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str));
+   }
+    data.res = b64EncodeUnicode("✓ à la mode");
     
     return data;
 };
