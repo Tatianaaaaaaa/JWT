@@ -1,10 +1,20 @@
 module.exports = (data) => {
-    var signature = 'saffadddf';
-    data.res = base64UrlEncode(signature); 
+   function utf8_to_b64(str) {
+      return window.btoa(unescape(encodeURIComponent(str)));
+    }
+    data.res = utf8_to_b64("✓ à la mode"); ; 
     
     return data;
 };
 
+
+
+/*module.exports = (data) => {
+    var signature = 'saffadddf';
+    data.res = base64UrlEncode(signature); 
+    
+    return data;
+};*/
 
 
 /*const sha1 = require("crypto-js/sha1");
