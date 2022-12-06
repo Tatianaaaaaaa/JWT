@@ -1,9 +1,6 @@
 module.exports = (data) => 
 
- {
-  "alg": "HS256",
-  "typ": "JWT"
-}
+ data.a = 1;
   
 
     return data;
