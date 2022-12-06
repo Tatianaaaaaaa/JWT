@@ -1,6 +1,6 @@
 module.exports = (data) => 
 
- data.a = 1;
+ data.hello = "Hello World!";
   
 
     return data;
