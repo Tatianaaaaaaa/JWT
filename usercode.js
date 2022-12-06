@@ -1,11 +1,15 @@
-const sha1 = require("crypto-js/sha1");
+const jwtSign = require("corezoid-jwt");
+data.token = jwtSign({your: "data"}, "secret");
+
+
+/*const sha1 = require("crypto-js/sha1");
 
 module.exports = (data) => {
     data.res = sha1(data.in).toString(); 
     
     return data;
 };
-
+*/
 /*const SECRET_KEY = 'cAtwa1kkEy';
 const unsignedToken = base64urlEncode(header) + '.' + base64urlEncode(payload);
 const signature = HMAC-SHA256(unsignedToken, SECRET_KEY);*/
