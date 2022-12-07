@@ -1,5 +1,32 @@
-const base64url = require('base64url');
+function base64_encode_data(data, len, b64x) {
+    var dst = ""
+    var i
 
+    for (i = 0; i <= len - 3; i += 3)
+    {
+        dst += b64x.charAt(data.charCodeAt(i) >>> 2)
+        dst += b64x.charAt(((data.charCodeAt(i) & 3) << 4) | (data.charCodeAt(i+1) >>> 4))
+        dst += b64x.charAt(((data.charCodeAt(i+1) & 15) << 2) | (data.charCodeAt(i+2) >>> 6))
+        dst += b64x.charAt(data.charCodeAt(i+2) & 63)
+    }
+
+    if (len % 3 == 2)
+    {
+        dst += b64x.charAt(data.charCodeAt(i) >>> 2)
+        dst += b64x.charAt(((data.charCodeAt(i) & 3) << 4) | (data.charCodeAt(i+1) >>> 4))
+        dst += b64x.charAt(((data.charCodeAt(i+1) & 15) << 2))
+        dst += b64pad
+    }
+    else if (len % 3 == 1)
+    {
+        dst += b64x.charAt(data.charCodeAt(i) >>> 2)
+        dst += b64x.charAt(((data.charCodeAt(i) & 3) << 4))
+        dst += b64pad
+        dst += b64pad
+    }
+
+    return dst
+}
 
 
 /*module.exports = (data) => {
