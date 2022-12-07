@@ -1,49 +1,151 @@
-import jwt
-from cryptography.hazmat.primitives import serialization
 
-payload_data = {
-  "iat": 1670430472,
-  "exp": 1671035272,
-  "jti": "8TSuQqpkpAQC",
-  "application_id": "7918e7f8-ed7b-4be1-aca7-9bb2422e3f92"
-}
+var jwt = require('../index');
+var expect = require('chai').expect;
+var jws = require('jws');
+var PS_SUPPORTED = require('../lib/psSupported');
+const {generateKeyPairSync} = require("crypto");
 
+describe('signing a token asynchronously', function() {
 
+  describe('when signing a token', function() {
+    var secret = 'shhhhhh';
 
-key = """-----BEGIN PRIVATE KEY-----
-MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCMcnz3BghQ5aQU
-qcVU6k5Ym2TJ2m9SjdeDRy/Svlp7Buel+22lzN/liqNt20qF/iXGCQEFAxx5hVKu
-IVcjOK2P0hNrZ1s23H4fR3wJT4XRqBlzUtMyqn9YvovzxEhQhOnEw7YfLVwK2tid
-2DVubLZTHwX0P/NOJ224TqR62RoL7XugCCLzMW4Th5Gd0KQLK9OfOQb7N/xoCM87
-vgH4ID6qTvPOGWwKNJlneOA7UTtYwWen5VLd14UIQPeqBuBXElMc5HABQkreXYeD
-dVxNBNubFlNw5bRmSvILZ+aQZZNYvG511kvhuLmgt7Ue1wKZG1/YFHVqar0k5iBz
-1KczVm+ZAgMBAAECggEAK9iiQsxTVE4dB4Zo4LW1d9wrfwj+sBswKP/UYkqjHL1v
-HFZ+SMDJNXQuyWEoxuQtDsJI2zO5dAa3ZT1rYseTB89h2KoPw/TaOxGqG44EDQwZ
-xfMZlDu+Pgpezt98ZAbapF8lQF582baw4bZaF/tAgHqy9Snx33hXvK5wkxmsFAS9
-pffBByNdT7Plm7DHJ4ySyFoyiyaEWcyuOsLqulK/VxvJcReqAt4TKSS5OEaxT01a
-AwCTwG44biz92Ieug5SFQgI8Fncs8kYRR1JVhEjfnEc2xxModhyG4AKAvAAN5Rhi
-Pn3MNlDR5So37OZ5kGbVZ5jHi3dm12PbcsI4qcJ4MQKBgQDA8w5PfchmmQftVdSK
-7fcsR29GrowR+wBbAZ9Fx4S4oDPdqvCS05bJO27JgydjDaLys5IlBXcOn3MQ2GGq
-x7a+jbhy2aeUiYcZ9wLr55Ia8QZfRKsjFKjy6AvU438stnQZ1wujEYDA7F4s8iCI
-s36qwD2DTaVrT8cMccw5ieQjIwKBgQC6V2zANCRBpaAoNxajcfEby4nz4g3eHCQh
-dAMjubkU5+IfvFhn+JrVvLtusVufqcc0iXz8SMMMTQJnEz2FGM3U1yYBwBzL7zNf
-0V6CVMCHpOwH0Db4Tbd0i8teUaaqPE3xvN7YaI3z7M2uhet/RCZE5zcAEqyRDzHC
-y8JRLzAcEwKBgChMm5iOtOR44eb4HkRGH3HoGZ2xpx+6RQC8/f8dBONq0mph4Y1J
-FB1DhIgiFH/jwTzftI527b7oHqhOCVgaDlkOUI/sVcv4TXdm1/1diG6IGMSdGwFg
-t0jEnnQAb/duxCEBgTS12yZwN9s7VwA2PSZ8sFxUQ1B+gRxgSD9cRYHxAoGADojz
-OqrWiShaLcjeQzGIFRrzT8q6OjEHwHREKm06Op87zC3s129U5IcsN54t/25G05pF
-3Yfvbu4y2cdubQtaQtflZw2NMXsfDsJOFOx3eB0tLA7ZutSVEso0us6zqWO60Lhi
-yY6eRACcqphXnj26nnVKnP7X5xjAUOmD5sE/h3ECgYAiQp6BZ4OFzPwH7OxQ4cxy
-b9aCgUDIsgSuU41+Alc0hZ+09rC0yfv80fCZg2la74BE2rc5H+qvPKYaGpH8y5NN
-3LAhklDi+kN6P2wAapb72SxlMAXygcrGQQFWY1Fh00GXUqH/HNG/UiQoniRaeptd
-AuBeDNVlpyPEMtfocNoPxA==
------END PRIVATE KEY-----
-"""
+    it('should return the same result as singing synchronously', function(done) {
+      jwt.sign({ foo: 'bar' }, secret, { algorithm: 'HS256' }, function (err, asyncToken) {
+        if (err) return done(err);
+        var syncToken = jwt.sign({ foo: 'bar' }, secret, { algorithm: 'HS256' });
+        expect(asyncToken).to.be.a('string');
+        expect(asyncToken.split('.')).to.have.length(3);
+        expect(asyncToken).to.equal(syncToken);
+        done();
+      });
+    });
 
-token = jwt.encode(
-    payload=payload_data,
-    key=key,
-    algorithm='RS256'
-)
+    it('should work with empty options', function (done) {
+      jwt.sign({abc: 1}, "secret", {}, function (err) {
+        expect(err).to.be.null;
+        done();
+      });
+    });
 
-print(token)
+    it('should work without options object at all', function (done) {
+      jwt.sign({abc: 1}, "secret", function (err) {
+        expect(err).to.be.null;
+        done();
+      });
+    });
+
+    it('should work with none algorithm where secret is set', function(done) {
+      jwt.sign({ foo: 'bar' }, 'secret', { algorithm: 'none' }, function(err, token) {
+        expect(token).to.be.a('string');
+        expect(token.split('.')).to.have.length(3);
+        done();
+      });
+    });
+
+    //Known bug: https://github.com/brianloveswords/node-jws/issues/62
+    //If you need this use case, you need to go for the non-callback-ish code style.
+    it.skip('should work with none algorithm where secret is falsy', function(done) {
+      jwt.sign({ foo: 'bar' }, undefined, { algorithm: 'none' }, function(err, token) {
+        expect(token).to.be.a('string');
+        expect(token.split('.')).to.have.length(3);
+        done();
+      });
+    });
+
+    it('should return error when secret is not a cert for RS256', function(done) {
+      //this throw an error because the secret is not a cert and RS256 requires a cert.
+      jwt.sign({ foo: 'bar' }, secret, { algorithm: 'RS256' }, function (err) {
+        expect(err).to.be.ok;
+        done();
+      });
+    });
+
+    it('should not work for RS algorithms when modulus length is less than 2048 when allowInsecureKeySizes is false or not set', function(done) {
+      const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 1024 });
+
+      jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256' }, function (err) {
+        expect(err).to.be.ok;
+        done();
+      });
+    });
+
+    it('should work for RS algorithms when modulus length is less than 2048 when allowInsecureKeySizes is true', function(done) {
+      const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 1024 });
+
+      jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256', allowInsecureKeySizes: true }, done);
+    });
+
+    if (PS_SUPPORTED) {
+      it('should return error when secret is not a cert for PS256', function(done) {
+        //this throw an error because the secret is not a cert and PS256 requires a cert.
+        jwt.sign({ foo: 'bar' }, secret, { algorithm: 'PS256' }, function (err) {
+          expect(err).to.be.ok;
+          done();
+        });
+      });
+    }
+
+    it('should return error on wrong arguments', function(done) {
+      //this throw an error because the secret is not a cert and RS256 requires a cert.
+      jwt.sign({ foo: 'bar' }, secret, { notBefore: {} }, function (err) {
+        expect(err).to.be.ok;
+        done();
+      });
+    });
+
+    it('should return error on wrong arguments (2)', function(done) {
+      jwt.sign('string', 'secret', {noTimestamp: true}, function (err) {
+        expect(err).to.be.ok;
+        expect(err).to.be.instanceof(Error);
+        done();
+      });
+    });
+
+    it('should not stringify the payload', function (done) {
+      jwt.sign('string', 'secret', {}, function (err, token) {
+        if (err) { return done(err); }
+        expect(jws.decode(token).payload).to.equal('string');
+        done();
+      });
+    });
+
+    describe('when mutatePayload is not set', function() {
+      it('should not apply claims to the original payload object (mutatePayload defaults to false)', function(done) {
+        var originalPayload = { foo: 'bar' };
+        jwt.sign(originalPayload, 'secret', { notBefore: 60, expiresIn: 600 }, function (err) {
+          if (err) { return done(err); }
+          expect(originalPayload).to.not.have.property('nbf');
+          expect(originalPayload).to.not.have.property('exp');
+          done();
+        });
+      });
+    });
+
+    describe('when mutatePayload is set to true', function() {
+      it('should apply claims directly to the original payload object', function(done) {
+        var originalPayload = { foo: 'bar' };
+        jwt.sign(originalPayload, 'secret', { notBefore: 60, expiresIn: 600, mutatePayload: true }, function (err) {
+          if (err) { return done(err); }
+          expect(originalPayload).to.have.property('nbf').that.is.a('number');
+          expect(originalPayload).to.have.property('exp').that.is.a('number');
+          done();
+        });
+      });
+    });
+
+    describe('secret must have a value', function(){
+      [undefined, '', 0].forEach(function(secret){
+        it('should return an error if the secret is falsy and algorithm is not set to none: ' + (typeof secret === 'string' ? '(empty string)' : secret), function(done) {
+        // This is needed since jws will not answer for falsy secrets
+          jwt.sign('string', secret, {}, function(err, token) {
+            expect(err).to.exist;
+            expect(err.message).to.equal('secretOrPrivateKey must have a value');
+            expect(token).to.not.exist;
+            done();
+          });
+        });
+      });
+    });
+  });
+});
